@@ -1,0 +1,21 @@
+#include <QStyledItemDelegate>
+#include <QPainter>
+
+class SegmentDelegate : public QStyledItemDelegate {
+    Q_OBJECT
+
+public:
+    explicit SegmentDelegate(QObject *parent = nullptr)
+        : QStyledItemDelegate(parent) {}
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+        bool isHighlighted = index.model()->data(index, SegmentModel::HighlightRole).toBool();
+
+        if (isHighlighted) {
+            painter->fillRect(option.rect, QColor(255, 220, 220)); // Красный фон для выделенных
+        }
+
+        // Вызываем стандартную отрисовку текста
+        QStyledItemDelegate::paint(painter, option, index);
+    }
+};
