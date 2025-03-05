@@ -1,0 +1,77 @@
+#include <QAbstractTableModel>
+#include <vector>
+
+struct Segment {
+    int id;
+    QString field1;
+    QString field2;
+    QString field3;
+    bool highlighted;  // Дополнительное поле
+};
+
+class SegmentModel : public QAbstractTableModel {
+    Q_OBJECT
+
+public:
+    enum SegmentRoles {
+        HighlightRole = Qt::UserRole + 1 // Своя роль
+    };
+
+    explicit SegmentModel(QObject *parent = nullptr)
+        : QAbstractTableModel(parent) {}
+
+    void setSegments(const std::vector<Segment> &segments) {
+        beginResetModel();
+        m_segments = segments;
+        endResetModel();
+    }
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override {
+        Q_UNUSED(parent);
+        return static_cast<int>(m_segments.size());
+    }
+
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override {
+        Q_UNUSED(parent);
+        return 4; // ID + 3 поля
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override {
+        if (!index.isValid() || index.row() >= rowCount() || index.column() >= columnCount())
+            return QVariant();
+
+        const auto &segment = m_segments.at(index.row());
+
+        if (role == Qt::DisplayRole) {
+            switch (index.column()) {
+                case 0: return segment.id;
+                case 1: return segment.field1;
+                case 2: return segment.field2;
+                case 3: return segment.field3;
+            }
+        } else if (role == HighlightRole) {
+            return segment.highlighted; // Передаем флаг выделения
+        }
+
+        return QVariant();
+    }
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
+        if (role == Qt::DisplayRole) {
+            if (orientation == Qt::Horizontal) {
+                switch (section) {
+                    case 0: return "ID";
+                    case 1: return "Field 1";
+                    case 2: return "Field 2";
+                    case 3: return "Field 3";
+                }
+            } else {
+                return QString("Segment %1").arg(section + 1);
+            }
+        }
+        return QVariant();
+    }
+
+private:
+    std::vector<Segment> m_segments;
+};
