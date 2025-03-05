@@ -1,0 +1,27 @@
+#include <QApplication>
+#include <QTableView>
+#include "SegmentModel.h"
+#include "SegmentDelegate.h"
+
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+
+    std::vector<Segment> segments = {
+        {1, "A1", "B1", "C1", false},
+        {2, "A2", "B2", "C2", true},  // Этот сегмент будет выделяться
+        {3, "A3", "B3", "C3", false}
+    };
+
+    SegmentModel model;
+    model.setSegments(segments);
+
+    QTableView view;
+    view.setModel(&model);
+
+    SegmentDelegate delegate;
+    view.setItemDelegate(&delegate); // Назначаем делегат
+
+    view.show();
+
+    return app.exec();
+}
